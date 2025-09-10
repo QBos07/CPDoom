@@ -28,7 +28,7 @@
 #ifndef __BYTEBOOL__
 #define __BYTEBOOL__
 #include <stdbool.h>
-typedef bool boolean;
+typedef int boolean;
 typedef unsigned char byte;
 #endif
 
