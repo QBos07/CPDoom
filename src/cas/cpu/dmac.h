@@ -1,210 +1,241 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "helper.h"
 
-#include "../../helpers/macros.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __has_builtin
+#if __has_builtin(__builtin_expect)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#endif
+#endif
+
+#ifndef unlikely
+#define unlikely(x) (x)
+#endif
 
 // Configuration Enums
 typedef enum  
 {
-  CMS_NORMAL        = 0x0,
-  INTERMITTENT_16   = 0x2,
-  INTERMITTENT_64   = 0x3,
-  INTERMITTENT_256  = 0x4,
-} dmac_dmaor_cms;
+  DMAC_DMAOR_CMS_NORMAL           = 0x0,
+  DMAC_DMAOR_CMS_INTERMITTENT_16  = 0x2,
+  DMAC_DMAOR_CMS_INTERMITTENT_64  = 0x3,
+  DMAC_DMAOR_CMS_INTERMITTENT_256 = 0x4,
+} dmac_dmaor_cms_t;
 
 typedef enum  
 {
-  PRIORITY_0  = 0x0, // CH0 > CH1 > CH2 > CH3 > CH4 > CH5
-  PRIORITY_1  = 0x1, // CH0 > CH2 > CH3 > CH1 > CH4 > CH5
-  ROUND_ROBIN = 0x3,
-} dmac_dmaor_pr;
+  DMAC_DMAOR_PR_PRIORITY_0  = 0x0, // CH0 > CH1 > CH2 > CH3 > CH4 > CH5
+  DMAC_DMAOR_PR_PRIORITY_1  = 0x1, // CH0 > CH2 > CH3 > CH1 > CH4 > CH5
+  DMAC_DMAOR_PR_ROUND_ROBIN = 0x3,
+} dmac_dmaor_pr_t;
 
 // CHCR
 typedef enum  
 {
-  REPEAT_NORMAL       = 0x0,
-  REPEAT_SAR_DAR_TCR  = 0x1,
-  REPEAT_DAR_TCR      = 0x2,
-  REPEAT_SAR_TCR      = 0x3,
-  RELOAD_SAR_DAR_TCR  = 0x5,
-  RELOAD_DAR_TCR      = 0x6,
-  RELOAD_SAR_TCR      = 0x7,
-} dmac_chcr_rpt;
+  DMAC_CHCR_RPT_REPEAT_NORMAL      = 0x0,
+  DMAC_CHCR_RPT_REPEAT_SAR_DAR_TCR = 0x1,
+  DMAC_CHCR_RPT_REPEAT_DAR_TCR     = 0x2,
+  DMAC_CHCR_RPT_REPEAT_SAR_TCR     = 0x3,
+  DMAC_CHCR_RPT_RELOAD_SAR_DAR_TCR = 0x5,
+  DMAC_CHCR_RPT_RELOAD_DAR_TCR     = 0x6,
+  DMAC_CHCR_RPT_RELOAD_SAR_TCR     = 0x7,
+} dmac_chcr_rpt_t;
 
 typedef enum  
 {
-  READ_CYCLE = 0x0,
-  WRITE_CYCLE = 0x1,
-} dmac_chcr_am;
+  DMAC_CHCR_AM_READ_CYCLE = 0x0,
+  DMAC_CHCR_AM_WRITE_CYCLE = 0x1,
+} dmac_chcr_am_t;
 
 typedef enum  
 {
-  ACTIVE_LOW = 0x0,
-  ACTIVE_HIGH = 0x1,
-} dmac_chcr_al;
+  DMAC_CHCR_AL_ACTIVE_LOW = 0x0,
+  DMAC_CHCR_AL_ACTIVE_HIGH = 0x1,
+} dmac_chcr_al_t;
 
 typedef enum  
 {
-  SIZE_1_0    = 0x0,
-  SIZE_2_0    = 0x1,
-  SIZE_4_0    = 0x2,
-  SIZE_16_0   = 0x3,
-  SIZE_32_0   = 0x0,
-  SIZE_8_0    = 0x3,
-  SIZE_8x2_0  = 0x3,
-  SIZE_16x2_0 = 0x0,
-} dmac_chcr_ts_0;
+  DMAC_CHCR_TS_LS_SIZE_1    = 0x0,
+  DMAC_CHCR_TS_LS_SIZE_2    = 0x1,
+  DMAC_CHCR_TS_LS_SIZE_4    = 0x2,
+  DMAC_CHCR_TS_LS_SIZE_16   = 0x3,
+  DMAC_CHCR_TS_LS_SIZE_32   = 0x0,
+  DMAC_CHCR_TS_LS_SIZE_8    = 0x3,
+  DMAC_CHCR_TS_LS_SIZE_8x2  = 0x3,
+  DMAC_CHCR_TS_LS_SIZE_16x2 = 0x0,
+} dmac_chcr_ts_ls_t;
 
 typedef enum  
 {
-  SIZE_1_1    = 0x0,
-  SIZE_2_1    = 0x0,
-  SIZE_4_1    = 0x0,
-  SIZE_16_1   = 0x0,
-  SIZE_32_1   = 0x1,
-  SIZE_8_1    = 0x1,
-  SIZE_8x2_1  = 0x2,
-  SIZE_16x2_1 = 0x3,
-} dmac_chcr_ts_1;
+  DMAC_CHCR_TS_MS_SIZE_1    = 0x0,
+  DMAC_CHCR_TS_MS_SIZE_2    = 0x0,
+  DMAC_CHCR_TS_MS_SIZE_4    = 0x0,
+  DMAC_CHCR_TS_MS_SIZE_16   = 0x0,
+  DMAC_CHCR_TS_MS_SIZE_32   = 0x1,
+  DMAC_CHCR_TS_MS_SIZE_8    = 0x1,
+  DMAC_CHCR_TS_MS_SIZE_8x2  = 0x2,
+  DMAC_CHCR_TS_MS_SIZE_16x2 = 0x3,
+} dmac_chcr_ts_ms_t;
 
 typedef enum  
 {
-  DAR_FIXED_SOFT  = 0x0, // Address is fixed, but will be incremented in 16/32-byte division  
-                         // transfer mode. Check SH7730 User's Manual Figure 12.3.7  
-  DAR_INCREMENT   = 0x1,
-  DAR_DECREMENT   = 0x2, // Prohibited in 8/16/32-byte transfer mode
-  DAR_FIXED_HARD  = 0x3, // Address is fixed, even in 16/32-byte division transfer mode. 
-} dmac_chcr_dm;
+  DMAC_CHCR_DM_SM_FIXED_SOFT = 0x0, // Address is fixed, but will be incremented in 16/32-byte division  
+                                // transfer mode. Check SH7730 User's Manual Figure 12.3.7  
+  DMAC_CHCR_DM_SM_INCREMENT  = 0x1,
+  DMAC_CHCR_DM_SM_DECREMENT  = 0x2, // Prohibited in 8/16/32-byte transfer mode
+  DMAC_CHCR_DM_SM_FIXED_HARD = 0x3, // Address is fixed, even in 16/32-byte division transfer mode. 
+} dmac_chcr_dm_sm_t;
 
 typedef enum  
 {
-  SAR_FIXED_SOFT  = 0x0, // Address is fixed, but will be incremented in 16/32-byte division  
-                         // transfer mode. Check SH7730 User's Manual Figure 12.3.7  
-  SAR_INCREMENT   = 0x1,
-  SAR_DECREMENT   = 0x2, // Prohibited in 8/16/32-byte transfer mode
-  SAR_FIXED_HARD  = 0x3, // Address is fixed, even in 16/32-byte division transfer mode. 
-} dmac_chcr_sm;
+  DMAC_CHCR_RS_EXTERNAL = 0x0,  
+  DMAC_CHCR_RS_AUTO     = 0x4,
+  DMAC_CHCR_RS_DMARS    = 0x8,
+} dmac_chcr_rs_t;
 
 typedef enum  
 {
-  EXTERNAL  = 0x0,  
-  AUTO      = 0x4,
-  DMARS     = 0x8,
-} dmac_chcr_rs;
+  DMAC_CHCR_DLDS_LOW_LEVEL    = 0x0,  
+  DMAC_CHCR_DLDS_FALLING_EDGE = 0x1,
+  DMAC_CHCR_DLDS_HIGH_LEVEL   = 0x2,
+  DMAC_CHCR_DLDS_RISING_EDGE  = 0x3,
+} dmac_chcr_dlds_t;
 
 typedef enum  
 {
-  LOW_LEVEL     = 0x0,  
-  FALLING_EDGE  = 0x1,
-  HIGH_LEVEL    = 0x2,
-  RISING_EDGE   = 0x3,
-} dmac_chcr_dlds;
+  DMAC_CHCR_TB_CYCLE_STEAL = 0x0,  
+  DMAC_CHCR_TB_BURST       = 0x1,
+} dmac_chcr_tb_t;
 
-typedef enum  
-{
-  CYCLE_STEAL = 0x0,  
-  BURST       = 0x1,
-} dmac_chcr_tb;
+typedef regstruct {
+  unsigned                : 1;
+  bool              lckn  : 1; // Bus Release Enable in Cycle Steal Mode
+  unsigned                : 2;
+  dmac_chcr_rpt_t   rpt   : 3; // DMA Settings Renewal Specify
+  unsigned                : 1;
+  bool              do_   : 1; // DMA Overrun
+  unsigned                : 1;
+  dmac_chcr_ts_ms_t ts_ms : 2; // DMA Transfer Size Specify (MS 2 bits)
+  bool              he    : 1; // Half End Flag
+  bool              hie   : 1; // Half End Interrupt Enable
+  dmac_chcr_am_t    am    : 1; // Acknowledge Mode
+  dmac_chcr_al_t    al    : 1; // Acknowledge Level
+  dmac_chcr_dm_sm_t dm    : 2; // Destination Address Mode
+  dmac_chcr_dm_sm_t sm    : 2; // Source Address Mode
+  dmac_chcr_rs_t    rs    : 4; // Resource Select
+  dmac_chcr_dlds_t  dlds  : 2; // DREQ Level and Edge Select
+  dmac_chcr_tb_t    tb    : 1; // Transfer Bus Mode
+  dmac_chcr_ts_ls_t ts_ls : 2; // DMA Transfer Size Specify (LS 2 bits)
+  bool              ie    : 1; // Interrupt Enable
+  bool              te    : 1; // Transfer End Flag
+  bool              de    : 1; // DMA Enable
+} dmac_chcr_t;
 
-typedef union 
+typedef regstructx(16)
 {
-  struct 
-  {
-    uint32_t        _reserved0  : 1;
-    uint32_t        LCKN        : 1; // Bus Release Enable in Cycle Steal Mode
-    uint32_t        _reserved1  : 2;
-    dmac_chcr_rpt   RPT         : 3; // DMA Settings Renewal Specify
-    uint32_t        _reserved2  : 1;
-    uint32_t        DO          : 1; // DMA Overrun
-    uint32_t        _reserved3  : 1;
-    dmac_chcr_ts_1  TS_1        : 2; // DMA Transfer Size Specify (MS 2 bits)
-    uint32_t        HE          : 1; // Half End Flag
-    uint32_t        HIE         : 1; // Half End Interrupt Enable
-    dmac_chcr_am    AM          : 1; // Acknowledge Mode
-    dmac_chcr_al    AL          : 1; // Acknowledge Level
-    dmac_chcr_dm    DM          : 2; // Destination Address Mode
-    dmac_chcr_sm    SM          : 2; // Source Address Mode
-    dmac_chcr_rs    RS          : 4; // Resource Select
-    dmac_chcr_dlds  DLDS        : 2; // DREQ Level and Edge Select
-    dmac_chcr_tb    TB          : 1; // Transfer Bus Mode
-    dmac_chcr_ts_0  TS_0        : 2; // DMA Transfer Size Specify (LS 2 bits)
-    uint32_t        IE          : 1; // Interrupt Enable
-    uint32_t        TE          : 1; // Transfer End Flag
-    uint32_t        DE          : 1; // DMA Enable
-  };
-  uint32_t raw;
-} dmac_chcr;
+  dmac_dmaor_cms_t cms  : 4; // Cycle Steal Mode
+  unsigned            : 2;               
+  dmac_dmaor_pr_t  pr   : 2; // Priority Mode
+  unsigned            : 5;
+  bool           ae   : 1; // Address Error Flag
+  bool           nmif : 1; // NMI Flag
+  bool           dme  : 1; // DMA Master Enable
+} dmac_dmaor_t;
 
-typedef union 
-{
-  struct 
-  {
-    dmac_dmaor_cms CMS        : 4; // Cycle Steal Mode
-    uint16_t       _reserved0 : 2;               
-    dmac_dmaor_pr  PR         : 2; // Priority Mode
-    uint16_t       _reserved1 : 5;
-    uint16_t       AE         : 1; // Address Error Flag
-    uint16_t       NMIF       : 1; // NMI Flag
-    uint16_t       DME        : 1; // DMA Master Enable
-  };
-  uint16_t raw;
-} dmac_dmaor;
+typedef union {
+  uint32_t full;
+  regstruct {
+    uint16_t restore;
+    uint16_t counter;
+  } split;
+} dmac_tcrb_t;
+
+typedef volatile void *dmac_sar_t;
+typedef volatile void *dmac_dar_t;
+typedef uint32_t dmac_tcr_t;
 
 // Channel 0
-#define DMAC_SAR_0  ((volatile uint32_t *)0xFE008020)
-#define DMAC_DAR_0  ((volatile uint32_t *)0xFE008024)
-#define DMAC_TCR_0  ((volatile uint32_t *)0xFE008028)
-#define DMAC_CHCR_0 ((volatile dmac_chcr *)0xFE00802C)
+HW_REG_T(DMAC_SAR0, 0xFE008020, dmac_sar_t);
+HW_REG_T(DMAC_DAR0, 0xFE008024, dmac_dar_t);
+HW_REG_T(DMAC_TCR0, 0xFE008028, dmac_tcr_t);
+HW_REG_T(DMAC_SARB0, 0xFE008120, dmac_sar_t);
+HW_REG_T(DMAC_DARB0, 0xFE008124, dmac_dar_t);
+HW_REG32(DMAC_TCRB0, 0xFE008128);
+#define AS_STRUCT_TYPE_DMAC_TCRB0 dmac_tcrb_t
+HW_REG32(DMAC_CHCR0, 0xFE00802C);
+#define AS_STRUCT_TYPE_DMAC_CHCR0 dmac_chcr_t
 
 // Channel 1
-#define DMAC_SAR_1  ((volatile uint32_t *)0xFE008030)
-#define DMAC_DAR_1  ((volatile uint32_t *)0xFE008034)
-#define DMAC_TCR_1  ((volatile uint32_t *)0xFE008038)
-#define DMAC_CHCR_1 ((volatile dmac_chcr *)0xFE00803C)
+HW_REG_T(DMAC_SAR1, 0xFE008030, dmac_sar_t);
+HW_REG_T(DMAC_DAR1, 0xFE008034, dmac_dar_t);
+HW_REG_T(DMAC_TCR1, 0xFE008038, dmac_tcr_t);
+HW_REG_T(DMAC_SARB1, 0xFE008130, dmac_sar_t);
+HW_REG_T(DMAC_DARB1, 0xFE008134, dmac_dar_t);
+HW_REG32(DMAC_TCRB1, 0xFE008138);
+#define AS_STRUCT_TYPE_DMAC_TCRB1 dmac_tcrb_t
+HW_REG32(DMAC_CHCR1, 0xFE00803C);
+#define AS_STRUCT_TYPE_DMAC_CHCR1 dmac_chcr_t
 
 // Common
-#define DMAC_DMAOR  ((volatile dmac_dmaor *)0xFE008060)
-
-// Channel 0 B-Registers
-#define DMAC_SARB_0 ((volatile uint32_t *)0xFE008120)
-#define DMAC_DARB_0 ((volatile uint32_t *)0xFE008124)
-#define DMAC_TCRB_0 ((volatile uint32_t *)0xFE008128)
-
-// Channel 1 B-Registers
-#define DMAC_SARB_1 ((volatile uint32_t *)0xFE008130)
-#define DMAC_DARB_1 ((volatile uint32_t *)0xFE008134)
-#define DMAC_TCRB_1 ((volatile uint32_t *)0xFE008138)
+HW_REG_T(DMAC_DMAOR, 0xFE008060, uint16_t);
+#define AS_STRUCT_TYPE_DMAC_DMAOR dmac_dmaor_t
 
 /**
  * Waits for a DMA operation to complete on a channel.
  *   
- * @param chcr The control register of the channel to wait for.
+ * @param channel The channel to wait for.
  * 
  * @return Returns true on successful operation and false for an address error.
 */
-inline bool dma_wait(volatile dmac_chcr *chcr) 
+inline bool dma_wait(size_t channel) 
 {
+  volatile uint32_t *chcr_ptr;
+  switch (channel) {
+    case 0:
+      chcr_ptr = DMAC_CHCR0;
+      break;
+    case 1:
+      chcr_ptr = DMAC_CHCR1;
+      break;
+  }
+
   // Check if DMA was never running
-  if (unlikely(!chcr->DE || !DMAC_DMAOR->DME)) 
+  dmac_chcr_t chcr;
+  AS_STRUCT_TYPE(DMAC_DMAOR) dmaor;
+
+  AS_STRUCT_GET(chcr_ptr, chcr);
+  AS_STRUCT_GET(DMAC_DMAOR, dmaor);
+
+  if (unlikely(!chcr.de || !dmaor.dme)) 
   {
     return true;
   }
 
-  for (;;)
+  while(true)
   {
-    if (DMAC_DMAOR->AE) 
+    
+    AS_STRUCT_GET(chcr_ptr, chcr);
+    AS_STRUCT_GET(DMAC_DMAOR, dmaor);
+
+    if (unlikely(dmaor.ae)) 
     {
       // Address error
-      DMAC_DMAOR->AE = 0;
+      dmaor.ae = 0;
+      AS_STRUCT_SET(DMAC_DMAOR, dmaor);
       return false;
     }
 
-    if (chcr->TE) 
+    if (chcr.te)
     {
       // Success
       return true;
     }
   }
 }
+
+#ifdef __cplusplus
+}
+#endif
